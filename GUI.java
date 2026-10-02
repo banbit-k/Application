@@ -8,8 +8,8 @@ public class GUI {
     // โหลดรูปและปรับขนาด
     public static ImageIcon loadImage(String fileName) {
         try {
-            String folder = System.getProperty("user.dir");
-            File imageFile = new File(folder, fileName);
+            //String folder = System.getProperty("user.dir");
+            File imageFile = new File("image/" + fileName);
 
             byte[] imageBytes = Files.readAllBytes(imageFile.toPath());
             ImageIcon icon = new ImageIcon(imageBytes);
