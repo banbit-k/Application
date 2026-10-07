@@ -1,5 +1,4 @@
 package GUI_Menu;
-//import java.awt.*;
 
 public class CoffeeMenuCard extends Menu {
 
