@@ -1,4 +1,4 @@
-+package GUI_Menu;
+package GUI_Menu;
 
 import java.awt.*;
 import javax.swing.*;

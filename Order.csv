@@ -1,1 +1,2 @@
-NumberOrder,Namemenu,status
+OrderNo,DateTime,Menu,Sweetness,Temperature,Price,Status
+1,2026-10-09 11:46:27,Latte,50,Iced,35,Not Ready

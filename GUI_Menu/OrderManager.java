@@ -14,7 +14,7 @@ import java.util.List;
 public class OrderManager {
 
     private static final File FILE = new File("Order.csv");
-    private static final String HEADER = "OrderNo,DateTime,Menu,Sweetness,Temperature,Price";
+    private static final String HEADER = "OrderNo,DateTime,Menu,Sweetness,Temperature,Price,Status";
 
     // บันทึกออร์เดอร์ แล้วคืนเลขออร์เดอร์ (เริ่มที่ 1)
     // sweetness ส่ง null ถ้าเมนูนั้นไม่มีความหวาน
@@ -25,8 +25,9 @@ public class OrderManager {
 
         String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         String line = orderNo + "," + time + "," + menu + ","
-                + (sweetness == null ? "-" : sweetness) + "," + temperature + "," + price
-                + System.lineSeparator();
+           + (sweetness == null ? "-" : sweetness) + "," + temperature + "," + price
+           + ",Not Ready"
+           + System.lineSeparator();
 
         Files.write(FILE.toPath(), line.getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.APPEND);
