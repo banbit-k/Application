@@ -48,8 +48,19 @@ public class GUI {
         // MENU
         JLabel Coffee = new JLabel("MENU");
         Coffee.setFont(new Font("Tahoma", Font.BOLD, 20));
-        Coffee.setBounds(10, 70, 386, 30);
+        Coffee.setBounds(10, 70, 90, 30);
         cp.add(Coffee);
+
+        // ปุ่ม Admin (เปิดหน้ายืนยันออเดอร์)
+        JButton adminBtn = new JButton("Admin");
+        adminBtn.setFont(new Font("Tahoma", Font.BOLD, 12));
+        adminBtn.setBackground(new Color(90, 60, 40));
+        adminBtn.setForeground(Color.WHITE);
+        adminBtn.setFocusPainted(false);
+        adminBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        adminBtn.setBounds(105, 70, 85, 30);
+        adminBtn.addActionListener(e -> AdminPage.open());
+        cp.add(adminBtn);
 
         // เมนูกาแฟ (ราคาตรงกับหน้ารายละเอียด)
         CoffeeMenuCard card1 = new CoffeeMenuCard("ลาเต้ (Latte)", "35", "latte.jpg", 110);

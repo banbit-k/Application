@@ -111,41 +111,153 @@ public class OrderStatusButton extends JButton {
     }
 
     // =========================
-    // Pop-up แสดงรายละเอียดออร์เดอร์
-    // d = {OrderNo, DateTime, Menu, Sweetness, Temperature, Price, Status}
+    // หน้าต่างแสดงรายละเอียดออร์เดอร์ + เวลานับถอยหลังแบบเรียลไทม์
+    // initial = {OrderNo, DateTime, Menu, Sweetness, Temperature, Price, Status}
+    // - เวลาลดลงทุก 1 วินาที
+    // - อ่านสถานะจาก Order.csv ทุกวินาที ถ้า Admin กด Confirm (Ready) เวลาจะเป็น 0:00 ทันที
     // =========================
-    private void showOrderDetailPopup(JFrame parent, String[] d) {
-        String sweetness = d[3].trim().equals("-") ? "-" : d[3].trim() + "%";
+    private void showOrderDetailPopup(JFrame parent, String[] initial) {
+        final String[] d = initial;
+        final String sweetness = d[3].trim().equals("-") ? "-" : d[3].trim() + "%";
 
-        String timeInfo = "";
+        // เวลาที่คาดว่าจะเสร็จ = เวลาสั่ง + 5 นาที
+        LocalDateTime parsed = null;
         try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            LocalDateTime targetTime = LocalDateTime.parse(d[1].trim(), formatter).plusMinutes(5);
-            long remainingSeconds = Duration.between(LocalDateTime.now(), targetTime).getSeconds();
-
-            if (remainingSeconds > 0) {
-                timeInfo = String.format("⏳ Remaining time: %d:%02d minutes\n(Expected completion: %s)",
-                        remainingSeconds / 60, remainingSeconds % 60,
-                        targetTime.format(DateTimeFormatter.ofPattern("HH:mm:ss")));
-            } else {
-                timeInfo = "✅ Order is ready for service!";
-            }
+            parsed = LocalDateTime.parse(d[1].trim(),
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).plusMinutes(5);
         } catch (Exception ex) {
             // อ่านเวลาไม่ได้ ก็ข้ามส่วนนับเวลา
         }
+        final LocalDateTime target = parsed;
 
-        String message = "📋 Order #" + d[0].trim() + "\n" +
-                "🕒 Order Time: " + d[1].trim() + "\n" +
-                "----------------------------------------\n" +
-                "• Menu: " + d[2].trim() + "\n" +
-                "• Sweetness: " + sweetness + "\n" +
-                "• Temperature: " + d[4].trim() + "\n" +
-                "• Price: " + d[5].trim() + " Baht\n" +
-                "• Status: " + d[6].trim() + "\n" +
-                "----------------------------------------\n" +
-                timeInfo;
+        int no = 0;
+        try {
+            no = Integer.parseInt(d[0].trim());
+        } catch (NumberFormatException ignored) { }
+        final int orderNo = no;
 
-        JOptionPane.showMessageDialog(parent, message,
-                "Order Status & Details", JOptionPane.INFORMATION_MESSAGE);
+        JDialog dialog = new JDialog(parent, "Order Status & Details", true);
+        dialog.setSize(340, 470);
+        dialog.setResizable(false);
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        dialog.setLocationRelativeTo(parent);
+
+        JPanel panel = new JPanel(null);
+        panel.setBackground(Color.WHITE);
+
+        JLabel title = new JLabel("Order #" + d[0].trim());
+        title.setFont(new Font("Tahoma", Font.BOLD, 20));
+        title.setBounds(30, 15, 270, 28);
+        panel.add(title);
+
+        JLabel timeLabel = new JLabel("Order Time: " + d[1].trim());
+        timeLabel.setFont(new Font("Tahoma", Font.PLAIN, 14));
+        timeLabel.setForeground(Color.GRAY);
+        timeLabel.setBounds(30, 45, 280, 22);
+        panel.add(timeLabel);
+
+        JSeparator sep1 = new JSeparator();
+        sep1.setBounds(30, 75, 270, 2);
+        panel.add(sep1);
+
+        String[] rows = {
+                "Menu: " + d[2].trim(),
+                "Sweetness: " + sweetness,
+                "Temperature: " + d[4].trim(),
+                "Price: " + d[5].trim() + " Baht"
+        };
+        int y = 85;
+        for (String r : rows) {
+            JLabel l = new JLabel(r);
+            l.setFont(new Font("Tahoma", Font.PLAIN, 15));
+            l.setBounds(30, y, 270, 24);
+            panel.add(l);
+            y += 26;
+        }
+
+        JLabel statusLabel = new JLabel();
+        statusLabel.setFont(new Font("Tahoma", Font.BOLD, 15));
+        statusLabel.setBounds(30, y, 270, 24);
+        panel.add(statusLabel);
+
+        JSeparator sep2 = new JSeparator();
+        sep2.setBounds(30, y + 35, 270, 2);
+        panel.add(sep2);
+
+        JLabel remainCaption = new JLabel("Remaining time");
+        remainCaption.setFont(new Font("Tahoma", Font.PLAIN, 14));
+        remainCaption.setForeground(Color.GRAY);
+        remainCaption.setBounds(30, y + 45, 270, 22);
+        panel.add(remainCaption);
+
+        JLabel remainLabel = new JLabel("-");
+        remainLabel.setFont(new Font("Tahoma", Font.BOLD, 40));
+        remainLabel.setForeground(RoundButton.ORANGE);
+        remainLabel.setBounds(30, y + 65, 270, 50);
+        panel.add(remainLabel);
+
+        JLabel noteLabel = new JLabel(" ");
+        noteLabel.setFont(new Font("Tahoma", Font.PLAIN, 14));
+        noteLabel.setBounds(30, y + 118, 280, 24);
+        panel.add(noteLabel);
+
+        RoundButton ok = new RoundButton("OK");
+        ok.setBounds(30, y + 155, 270, 45);
+        ok.setBackground(RoundButton.ORANGE);
+        ok.setForeground(Color.WHITE);
+        ok.setFont(new Font("Tahoma", Font.BOLD, 16));
+        ok.addActionListener(e -> dialog.dispose());
+        panel.add(ok);
+
+        // อัปเดตหน้าจอ: อ่านสถานะล่าสุดจากไฟล์ + คำนวณเวลาที่เหลือ
+        Runnable update = () -> {
+            String[] cur = findOrder(orderNo);
+            if (cur == null) cur = d;
+            String status = cur[6].trim();
+            boolean ready = status.equalsIgnoreCase(OrderManager.STATUS_READY);
+
+            statusLabel.setText("Status: " + status);
+            statusLabel.setForeground(ready ? new Color(30, 140, 60) : Color.BLACK);
+
+            if (ready) {
+                // Admin กด Confirm แล้ว -> เวลาเป็น 0 ทันที
+                remainLabel.setText("0:00");
+                noteLabel.setText("Your order is ready for service!");
+                noteLabel.setForeground(new Color(30, 140, 60));
+                return;
+            }
+
+            if (target == null) {
+                remainLabel.setText("-");
+                return;
+            }
+
+            long remaining = Math.max(0,
+                    Duration.between(LocalDateTime.now(), target).getSeconds());
+            remainLabel.setText(String.format("%d:%02d", remaining / 60, remaining % 60));
+
+            if (remaining > 0) {
+                noteLabel.setText("Expected completion: "
+                        + target.format(DateTimeFormatter.ofPattern("HH:mm:ss")));
+            } else {
+                noteLabel.setText("Waiting for the shop to confirm");
+            }
+            noteLabel.setForeground(Color.DARK_GRAY);
+        };
+
+        update.run(); // แสดงค่าทันทีตอนเปิด
+
+        // เดินทุก 1 วินาที
+        Timer timer = new Timer(1000, e -> update.run());
+        timer.start();
+        dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent e) {
+                timer.stop();
+            }
+        });
+
+        dialog.add(panel);
+        dialog.setVisible(true);
     }
 }
