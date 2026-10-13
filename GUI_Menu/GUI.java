@@ -5,7 +5,6 @@ import java.awt.event.*;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.List;
-
 import javax.swing.*;
 
 public class GUI {

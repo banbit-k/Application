@@ -179,7 +179,7 @@ public class AdminPage extends JFrame {
         card.add(priceLabel);
 
         if (ready) {
-            JLabel done = new JLabel("Ready \u2713", SwingConstants.RIGHT);
+            JLabel done = new JLabel("Ready ", SwingConstants.RIGHT);
             done.setFont(new Font("Tahoma", Font.BOLD, 16));
             done.setForeground(GREEN);
             done.setBounds(200, 75, 135, 30);
