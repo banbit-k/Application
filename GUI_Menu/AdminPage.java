@@ -17,15 +17,85 @@ public class AdminPage extends JFrame {
     private final JLabel summary = new JLabel(" ");
     private String lastSnapshot = null;
 
-    // เรียกจากปุ่ม Admin ในหน้าเมนู
+    // เรียกจากปุ่ม Admin ในหน้าเมนู (ต้องใส่รหัสผ่านก่อนเข้า)
     public static void open() {
+        open(null);
+    }
+
+    public static void open(Window parent) {
+        // ถ้าเปิดอยู่แล้ว (ผ่านรหัสมาแล้ว) แค่ดึงหน้าต่างขึ้นมา
         if (instance != null && instance.isDisplayable()) {
             instance.setState(JFrame.NORMAL);
             instance.toFront();
             instance.refresh(true);
             return;
         }
+        if (!askPassword(parent)) return; // รหัสไม่ผ่านหรือกดปิด -> ไม่เปิดหน้า Admin
         instance = new AdminPage();
+    }
+
+    // หน้าต่างกรอกรหัสผ่าน (รหัสถูก = true) ตรวจจากไฟล์ Admin.csv
+    private static boolean askPassword(Window parent) {
+        JDialog dialog = new JDialog(parent, "Admin Login", Dialog.ModalityType.APPLICATION_MODAL);
+        dialog.setSize(340, 250);
+        dialog.setResizable(false);
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        dialog.setLocationRelativeTo(parent);
+
+        JPanel panel = new JPanel(null);
+        panel.setBackground(Color.WHITE);
+
+        JLabel title = new JLabel("Admin Login");
+        title.setFont(new Font("Tahoma", Font.BOLD, 20));
+        title.setBounds(30, 18, 270, 30);
+        panel.add(title);
+
+        JLabel hint = new JLabel("Enter password");
+        hint.setFont(new Font("Tahoma", Font.PLAIN, 14));
+        hint.setForeground(Color.GRAY);
+        hint.setBounds(30, 48, 270, 22);
+        panel.add(hint);
+
+        JPasswordField field = new JPasswordField();
+        field.setFont(new Font("Tahoma", Font.PLAIN, 18));
+        field.setBounds(30, 75, 265, 40);
+        panel.add(field);
+
+        JLabel error = new JLabel(" ");
+        error.setFont(new Font("Tahoma", Font.PLAIN, 12));
+        error.setForeground(new Color(200, 30, 30));
+        error.setBounds(30, 119, 265, 20);
+        panel.add(error);
+
+        RoundButton login = new RoundButton("Login");
+        login.setBounds(30, 150, 265, 45);
+        login.setBackground(RoundButton.ORANGE);
+        login.setForeground(Color.WHITE);
+        login.setFont(new Font("Tahoma", Font.BOLD, 16));
+        panel.add(login);
+
+        final boolean[] ok = {false};
+        Runnable submit = () -> {
+            String input = new String(field.getPassword());
+            if (input.isEmpty()) {
+                error.setText("Please enter the password");
+                return;
+            }
+            if (AdminAuth.checkPassword(input)) {
+                ok[0] = true;
+                dialog.dispose();
+            } else {
+                error.setText("Wrong password");
+                field.setText("");
+                field.requestFocusInWindow();
+            }
+        };
+        login.addActionListener(e -> submit.run());
+        field.addActionListener(e -> submit.run()); // กด Enter ก็เข้าสู่ระบบได้
+
+        dialog.add(panel);
+        dialog.setVisible(true); // modal: รอจนกว่าจะปิดหน้าต่างนี้
+        return ok[0];
     }
 
     private AdminPage() {

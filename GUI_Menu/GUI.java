@@ -67,9 +67,9 @@ public class GUI {
         CoffeeMenuCard card3 = new CoffeeMenuCard("อเมริกาโน่ (Americano)", "30", "americano.jpg", 430);
 
         // คลิกการ์ดแล้วเปิดหน้ารายละเอียด
-        card1.setOnClick(() -> new GUILatte());
-        card2.setOnClick(() -> new GUIEspresso());
-        card3.setOnClick(() -> new GUIAmericano());
+        card1.setOnClick(() -> new GUILatte(f));
+        card2.setOnClick(() -> new GUIEspresso(f));
+        card3.setOnClick(() -> new GUIAmericano(f));
 
         cp.add(card1);
         cp.add(card2);

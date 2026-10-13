@@ -4,7 +4,7 @@ import java.awt.*;
 import javax.swing.*;
 
 // หน้ารายละเอียดเมนู (คลาสกลางของ Latte / Espresso / Americano)
-public class DetailPage extends JFrame {
+public class DetailPage extends JDialog {
 
     // ตั้งฟอนต์ของ dialog (JOptionPane) เป็น Tahoma เพื่อให้แสดงภาษาไทยได้
     static {
@@ -18,11 +18,11 @@ public class DetailPage extends JFrame {
 
     // subtitle = null  -> ไม่แสดงบรรทัดใต้ชื่อ
     // hasSweetness = false -> ไม่แสดงปุ่มความหวาน
-    public DetailPage(String name, String subtitle, int price, String imageName, boolean hasSweetness) {
-        super(name);
+    public DetailPage(Window owner,String name, String subtitle, int price, String imageName, boolean hasSweetness) {
+        super(owner, name, Dialog.ModalityType.DOCUMENT_MODAL);
         setSize(400, 800);
         setResizable(false);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // ปิดแค่หน้านี้ ไม่ปิดทั้งโปรแกรม
+        setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE); // ปิดแค่หน้านี้ ไม่ปิดทั้งโปรแกรม
         setLocationRelativeTo(null);
 
         JPanel panel = new JPanel(null);
