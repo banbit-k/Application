@@ -130,6 +130,7 @@ public class DetailPage extends JDialog {
                 detail += "\nPrice: " + price + " Baht";
                 JOptionPane.showMessageDialog(this, detail, "Order #" + no,
                         JOptionPane.INFORMATION_MESSAGE);
+                        dispose();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Failed to save order: " + ex.getMessage(),
                         "Error", JOptionPane.ERROR_MESSAGE);
