@@ -1,7 +1,9 @@
 package GUI_Menu;
 
+import java.awt.Window;
+
 public class GUIEspresso extends DetailPage {
-    public GUIEspresso() {
-        super("Espresso", null, 40, "espresso.jpg", false);
+    public GUIEspresso(Window owner) {
+        super(owner, "Espresso", null, 40, "espresso.jpg", false);
     }
 }
