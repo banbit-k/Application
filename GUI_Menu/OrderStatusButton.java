@@ -1,13 +1,15 @@
 package GUI_Menu;
-
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
+import GUI_Menu.OrderManager;
 
 public class OrderStatusButton extends JButton {
 
@@ -231,10 +233,26 @@ public class OrderStatusButton extends JButton {
                 remainLabel.setText("-");
                 return;
             }
+        
+            List<String[]> orders;
+            try {
+                orders = OrderManager.readOrders();
+             } catch (IOException ex) {
+            orders = new ArrayList<>();
+             }
+
+            int pending = 0;
+        // ออเดอร์ที่ยังไม่ Ready ขึ้นก่อน (เก่าสุดก่อน เพื่อทำตามลำดับคิว)
+            for (String[] d1 : orders) {
+            if (!isReady(d1)) {
+                pending++;
+             }
+         }
+            
 
             long remaining = Math.max(0,
                     Duration.between(LocalDateTime.now(), target).getSeconds());
-            remainLabel.setText(String.format("%d:%02d", remaining / 60, remaining % 60));
+            remainLabel.setText(String.format("%d:%02d", (remaining*pending) /60, remaining % 60));
 
             if (remaining > 0) {
                 noteLabel.setText("Expected completion: "
@@ -260,4 +278,12 @@ public class OrderStatusButton extends JButton {
         dialog.add(panel);
         dialog.setVisible(true);
     }
+
+     private boolean isReady(String[] d1) {
+        return d1[6].trim().equalsIgnoreCase(OrderManager.STATUS_READY);
+    }
+
+
+ 
+  
 }

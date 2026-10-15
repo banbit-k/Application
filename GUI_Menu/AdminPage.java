@@ -98,7 +98,7 @@ public class AdminPage extends JFrame {
         return ok[0];
     }
 
-    private AdminPage() {
+    AdminPage() {
         super("Admin - Confirm Orders");
         setSize(400, 650);
         setResizable(false);
@@ -156,7 +156,7 @@ public class AdminPage extends JFrame {
     }
 
     // force = true -> วาดใหม่เสมอ, false -> วาดใหม่เฉพาะตอนข้อมูลเปลี่ยน
-    private void refresh(boolean force) {
+    public  void refresh(boolean force) {
         List<String[]> orders;
         try {
             orders = OrderManager.readOrders();
@@ -196,7 +196,8 @@ public class AdminPage extends JFrame {
             empty.setForeground(Color.GRAY);
             listPanel.add(empty);
         }
-
+        System.out.println(pending*5);
+        System.out.println(pending*60);
         summary.setText("Pending: " + pending + "  |  Total: " + orders.size());
         listPanel.revalidate();
         listPanel.repaint();
